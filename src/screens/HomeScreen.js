@@ -1,101 +1,156 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, TextInput, StyleSheet, ScrollView, SafeAreaView, StatusBar, Platform, useWindowDimensions, KeyboardAvoidingView } from 'react-native';
+import { 
+  View, 
+  Text, 
+  TouchableOpacity, 
+  TextInput, 
+  StyleSheet, 
+  ScrollView, 
+  StatusBar, 
+  Alert,
+  Platform 
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context'; 
 import { useNavigation } from '@react-navigation/native';
-import { Plus, Camera, ChevronRight, Leaf } from 'lucide-react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import IngredientTag from '../components/IngredientTag';
+import { Plus, Heart, BookOpen, X } from 'lucide-react-native';
+import { useRecipes } from '../context/RecipeContext';
 
 export default function HomeScreen() {
-  const [ingredients, setIngredients] = useState(['rice', 'egg', 'canned tuna']);
-  const [input, setInput] = useState('');
   const navigation = useNavigation();
-  const { width } = useWindowDimensions();
-
-  const isLargeScreen = width > 768;
+  const { savedRecipes } = useRecipes();
+  const [ingredients, setIngredients] = useState(['rice', 'canned tuna', 'egg']);
+  const [input, setInput] = useState('');
 
   const addIngredient = () => {
-    if (input.trim()) {
-      const lower = input.toLowerCase();
-      if (!ingredients.includes(lower)) setIngredients([...ingredients, lower]);
+    const trimmed = input.trim().toLowerCase();
+    if (trimmed.length > 0 && !ingredients.includes(trimmed)) {
+      setIngredients([...ingredients, trimmed]);
       setInput('');
+    } else if (ingredients.includes(trimmed)) {
+      Alert.alert("Already exists", "This ingredient is already in your pantry.");
     }
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" />
-      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
-        <View style={styles.responsiveWrapper}>
-          <ScrollView 
-            contentContainerStyle={styles.scrollContent}
-            showsVerticalScrollIndicator={false}
-          >
-            <LinearGradient colors={['#1b5e20', '#2e7d32']} style={[styles.heroCard, isLargeScreen && { padding: 50 }]}>
-              <Leaf color="#FFD700" size={width > 600 ? 50 : 40} />
-              <Text style={[styles.heroTitle, isLargeScreen && { fontSize: 42 }]}>What's in your{"\n"}pantry today?</Text>
-              <TouchableOpacity style={styles.scanBadge} onPress={() => navigation.navigate('Scan')}>
-                <Camera color="#1b5e20" size={18} />
-                <Text style={styles.scanBadgeText}>AI SCANNER</Text>
-              </TouchableOpacity>
-            </LinearGradient>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        
+        {/* Header Section */}
+        <View style={styles.header}>
+          <View>
+            <Text style={styles.brandName}>BESTIE BITES</Text>
+            <Text style={styles.tagline}>What's in your pantry?</Text>
+          </View>
+          <View style={styles.bookIconBox}>
+            {/* FIX: Removed fill property to stop the HostFunction error */}
+            <BookOpen color="#ffffff" size={24} strokeWidth={2.5} />
+          </View>
+        </View>
 
-            <View style={styles.section}>
-              <Text style={styles.sectionLabel}>Quick Add</Text>
-              <View style={styles.inputCard}>
-                <TextInput 
-                  style={styles.input} 
-                  placeholder="e.g. Chicken breast..." 
-                  value={input} 
-                  onChangeText={setInput} 
-                  placeholderTextColor="#A0AAA0"
-                />
-                <TouchableOpacity style={styles.addBtn} onPress={addIngredient}>
-                  <Plus color="#1b5e20" size={24} />
-                </TouchableOpacity>
-              </View>
-            </View>
+        {/* Welcome Card - KEPT EXACTLY AS REQUESTED */}
+        <View style={styles.welcomeCard}>
+          <Text style={styles.welcomeText}>
+            👋 <Text style={{fontWeight: 'bold'}}>Welcome to Bestie Bites!</Text> Easy recipes for busy students with limited tools and budget. Let's cook something delicious!
+          </Text>
+        </View>
 
-            <View style={styles.section}>
-              <Text style={styles.sectionLabel}>Your Pantry ({ingredients.length})</Text>
-              <View style={styles.tagGrid}>
-                {ingredients.map((item) => (
-                  <IngredientTag key={item} name={item} onDelete={() => setIngredients(ingredients.filter(i => i !== item))} />
-                ))}
-              </View>
-            </View>
-          </ScrollView>
+        {/* Saved Recipes */}
+        <TouchableOpacity style={styles.savedButton} onPress={() => navigation.navigate('SavedRecipes')}>
+          <View style={styles.heartCircle}>
+            {/* FIX: We use color and strokeWidth instead of fill to prevent the crash */}
+            {savedRecipes.length > 0 ? (
+              <Heart size={22} color="#E91E63" strokeWidth={3} />
+            ) : (
+              <Heart size={22} color="#9E9E9E" strokeWidth={2} />
+            )}
+          </View>
+          <Text style={styles.savedText}>Saved Recipes ({savedRecipes.length})</Text>
+        </TouchableOpacity>
 
-          <View style={styles.footer}>
-            <TouchableOpacity style={styles.primaryBtn} onPress={() => navigation.navigate('Tools', { ingredients })}>
-              <LinearGradient colors={['#1b5e20', '#0a2e0c']} start={{x:0, y:0}} end={{x:1, y:0}} style={styles.gradientBtn}>
-                <Text style={styles.primaryBtnText}>Continue to Tools</Text>
-                <View style={styles.btnIconContainer}><ChevronRight color="#1b5e20" size={20} /></View>
-              </LinearGradient>
+        {/* Input Section */}
+        <View style={styles.card}>
+          <Text style={styles.label}>Input Your Ingredients</Text>
+          <View style={styles.inputWrapper}>
+            <TextInput 
+              style={styles.textInput} 
+              placeholder="Type ingredient name..." 
+              placeholderTextColor="#757575"
+              value={input} 
+              onChangeText={setInput} 
+              onSubmitEditing={addIngredient}
+              // FIX: Removes the black border seen in your screenshots
+              underlineColorAndroid="transparent"
+            />
+            <TouchableOpacity style={styles.plusBtn} onPress={addIngredient}>
+              <Plus color="#000000" size={24} strokeWidth={3} />
             </TouchableOpacity>
           </View>
         </View>
-      </KeyboardAvoidingView>
+
+        {/* Inventory Tags */}
+        <View style={[styles.card, { minHeight: 120 }]}>
+          <Text style={styles.label}>Your ingredients: ({ingredients.length})</Text>
+          <View style={styles.tagContainer}>
+            {ingredients.map((item) => (
+              <View key={item} style={styles.pill}>
+                <Text style={styles.pillText}>{item}</Text>
+                <TouchableOpacity onPress={() => setIngredients(ingredients.filter(i => i !== item))}>
+                  <X size={14} color="#ffffff" />
+                </TouchableOpacity>
+              </View>
+            ))}
+          </View>
+        </View>
+
+        <TouchableOpacity style={styles.mainBtn} onPress={() => navigation.navigate('Tools', { ingredients })}>
+          <Text style={styles.mainBtnText}>Next: Select Tools</Text>
+        </TouchableOpacity>
+
+      </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fdfef0' },
-  responsiveWrapper: { flex: 1, width: '100%', maxWidth: 850, alignSelf: 'center' },
-  scrollContent: { padding: 24, paddingBottom: 140 },
-  heroCard: { borderRadius: 32, padding: 30, marginBottom: 32 },
-  heroTitle: { color: '#fff', fontSize: 32, fontWeight: '800', marginTop: 15, letterSpacing: -0.5 },
-  scanBadge: { flexDirection: 'row', backgroundColor: '#FFD700', alignSelf: 'flex-start', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 14, marginTop: 20, alignItems: 'center' },
-  scanBadgeText: { color: '#1b5e20', fontWeight: '800', marginLeft: 8, fontSize: 13 },
-  section: { marginBottom: 32 },
-  sectionLabel: { fontSize: 13, fontWeight: '800', color: '#8a9a8a', textTransform: 'uppercase', letterSpacing: 1.5, marginBottom: 12 },
-  inputCard: { backgroundColor: '#fff', borderRadius: 20, padding: 6, flexDirection: 'row', alignItems: 'center', borderWidth: 1.5, borderColor: 'rgba(27, 94, 32, 0.05)' },
-  input: { flex: 1, height: 54, paddingHorizontal: 16, fontSize: 16, fontWeight: '500', color: '#1b5e20' },
-  addBtn: { backgroundColor: '#FFD700', width: 44, height: 44, borderRadius: 12, justifyContent: 'center', alignItems: 'center' },
-  tagGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-  footer: { position: 'absolute', bottom: 0, width: '100%', padding: 24, paddingBottom: Platform.OS === 'ios' ? 40 : 24, backgroundColor: '#fdfef0', borderTopWidth: 1, borderTopColor: 'rgba(0,0,0,0.04)' },
-  primaryBtn: { height: 64, borderRadius: 22, overflow: 'hidden' },
-  gradientBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 24 },
-  primaryBtnText: { color: '#FFD700', fontSize: 18, fontWeight: '800' },
-  btnIconContainer: { backgroundColor: '#FFD700', width: 36, height: 36, borderRadius: 10, justifyContent: 'center', alignItems: 'center' }
+  container: { flex: 1, backgroundColor: '#FFB300' },
+  scrollContent: { padding: 20 },
+  header: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20 },
+  brandName: { fontSize: 28, fontWeight: '900', color: '#000' },
+  tagline: { fontSize: 14, fontWeight: '800', color: '#000' },
+  bookIconBox: { backgroundColor: '#1B4D2E', padding: 8, borderRadius: 12 },
+  welcomeCard: { backgroundColor: '#C0CA33', padding: 18, borderRadius: 25, marginBottom: 15 },
+  welcomeText: { fontSize: 14, color: '#000', lineHeight: 19 },
+  savedButton: { backgroundColor: '#fff', flexDirection: 'row', alignItems: 'center', padding: 12, borderRadius: 22, marginBottom: 15 },
+  heartCircle: { backgroundColor: '#E0E0E0', width: 40, height: 40, borderRadius: 20, justifyContent: 'center', alignItems: 'center', marginRight: 15 },
+  savedText: { fontSize: 22, fontWeight: 'bold', color: '#000' },
+  card: { backgroundColor: '#fff', padding: 20, borderRadius: 25, marginBottom: 15 },
+  label: { fontSize: 18, fontWeight: '800', marginBottom: 15, color: '#000' },
+  inputWrapper: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    backgroundColor: '#E0E0E0', 
+    borderRadius: 25, 
+    paddingLeft: 20, 
+    paddingRight: 5, 
+    height: 50,
+  },
+  textInput: { 
+    flex: 1, 
+    fontSize: 16, 
+    fontWeight: '500', 
+    color: '#000',
+    // FIX: Explicitly removes borders for a clean look
+    borderWidth: 0,
+    ...Platform.select({
+      web: { outlineStyle: 'none' },
+      default: {}
+    }),
+  },
+  plusBtn: { backgroundColor: '#FFB300', width: 40, height: 40, borderRadius: 20, justifyContent: 'center', alignItems: 'center' },
+  tagContainer: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+  pill: { backgroundColor: '#C0CA33', flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 15 },
+  pillText: { color: '#ffffff', fontWeight: 'bold', marginRight: 5 },
+  mainBtn: { backgroundColor: '#1B4D2E', height: 65, borderRadius: 25, justifyContent: 'center', alignItems: 'center', marginTop: 10 },
+  mainBtnText: { color: '#ffffff', fontSize: 20, fontWeight: 'bold' }
 });

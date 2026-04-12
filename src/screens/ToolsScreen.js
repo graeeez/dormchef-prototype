@@ -1,70 +1,105 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, StatusBar, Platform, useWindowDimensions, FlatList } from 'react-native';
+import { 
+  View, 
+  Text, 
+  TouchableOpacity, 
+  StyleSheet, 
+  SafeAreaView, 
+  StatusBar, 
+  Image, 
+  ScrollView 
+} from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { LinearGradient } from 'expo-linear-gradient';
-import { MotiView } from 'moti';
-import { ArrowLeft, Microwave, Flame, Coffee, Refrigerator, Zap, ChefHat, ChevronRight, CheckCircle2 } from 'lucide-react-native';
+import { ChevronLeft } from 'lucide-react-native';
 
 const allTools = [
-  { id: 'microwave', name: "Microwave", Icon: Microwave },
-  { id: 'stove', name: "Stove", Icon: Flame },
-  { id: 'kettle', name: "Kettle", Icon: Coffee },
-  { id: 'fridge', name: "Fridge", Icon: Refrigerator },
-  { id: 'blender', name: "Blender", Icon: Zap },
-  { id: 'oven', name: "Oven", Icon: ChefHat },
+  { id: 'microwave', name: "Microwave", image: require('../../assets/microwave.png') },
+  { id: 'ricecooker', name: "Rice Cooker", image: require('../../assets/RiceCooker.png') },
+  { id: 'kettle', name: "Electric Kettle", image: require('../../assets/kettle.png') },
+  { id: 'stove', name: "Stove", image: require('../../assets/stove.png') },
+  { id: 'toaster', name: "Toaster", image: require('../../assets/toaster.png') },
+  { id: 'blender', name: "Blender", image: require('../../assets/blender.png') },
 ];
 
 export default function ToolsScreen() {
-  const [selectedTools, setSelectedTools] = useState([]);
   const navigation = useNavigation();
   const route = useRoute();
-  const { ingredients } = route.params || { ingredients: [] };
-  const { width } = useWindowDimensions();
+  
+  // 1. Get ingredients from Home. Fallback to dummy data so the app doesn't break during testing.
+  const selectedIngredients = route.params?.ingredients || ['rice', 'egg'];
 
-  const numColumns = width > 768 ? 3 : 2;
-  const availableWidth = Math.min(width, 1020) - 48;
-  const itemWidth = (availableWidth / numColumns) - 16;
+  // 2. State for selected tools
+  const [selectedTools, setSelectedTools] = useState([]);
 
   const toggleTool = (id) => {
-    setSelectedTools(prev => prev.includes(id) ? prev.filter(tid => tid !== id) : [...prev, id]);
+    setSelectedTools(prev => 
+      prev.includes(id) ? prev.filter(tid => tid !== id) : [...prev, id]
+    );
   };
 
-  const renderItem = ({ item }) => {
-    const active = selectedTools.includes(item.id);
-    return (
-      <TouchableOpacity onPress={() => toggleTool(item.id)} style={{ width: itemWidth, margin: 8, aspectRatio: 1 }}>
-        <MotiView animate={{ backgroundColor: active ? '#1b5e20' : '#ffffff', scale: active ? 0.95 : 1 }} style={styles.toolCard}>
-          <View style={[styles.iconCircle, active && { backgroundColor: 'rgba(255,255,255,0.2)' }]}>
-            <item.Icon color={active ? "#FFD700" : "#1b5e20"} size={width > 600 ? 32 : 28} />
-          </View>
-          <Text style={[styles.toolName, active && { color: '#fff' }]}>{item.name}</Text>
-          {active && <CheckCircle2 size={16} color="#FFD700" style={styles.checkBadge} />}
-        </MotiView>
-      </TouchableOpacity>
-    );
+  const handleFindRecipes = () => {
+    // 3. Pass BOTH ingredients and tools to the next screen
+    navigation.navigate('Recipes', { 
+      ingredients: selectedIngredients, 
+      tools: selectedTools 
+    });
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.responsiveWrapper}>
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}><ArrowLeft color="#1b5e20" size={24} /></TouchableOpacity>
-          <Text style={styles.title}>Kitchen Tools</Text>
+      <StatusBar barStyle="dark-content" />
+      
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <ChevronLeft color="#000" size={35} strokeWidth={3} />
+        </TouchableOpacity>
+        <View>
+          <Text style={styles.headerTitle}>Select Tools</Text>
+          <Text style={styles.headerSubtitle}>What can you cook with?</Text>
         </View>
-        <FlatList
-          data={allTools}
-          renderItem={renderItem}
-          numColumns={numColumns}
-          key={numColumns}
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-        />
+      </View>
+
+      <View style={styles.yellowBody}>
+        {/* Main White Card */}
+        <View style={styles.mainCard}>
+          <Text style={styles.instructionText}>
+            Select all the cooking tools you have access to. This helps us find recipes you can actually make!
+          </Text>
+
+          <View style={styles.toolsGrid}>
+            {allTools.map((item) => {
+              const isSelected = selectedTools.includes(item.id);
+              return (
+                <TouchableOpacity 
+                  key={item.id} 
+                  onPress={() => toggleTool(item.id)} 
+                  style={[styles.toolCard, isSelected && styles.toolCardActive]}
+                  activeOpacity={0.8}
+                >
+                  <View style={[styles.imageCircle, isSelected && styles.imageCircleActive]}>
+                    <Image source={item.image} style={styles.toolImage} resizeMode="contain" />
+                  </View>
+                  <Text style={styles.toolName}>{item.name}</Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </View>
+
+        {/* Footer Area */}
         <View style={styles.footer}>
-          <TouchableOpacity style={styles.nextBtn} onPress={() => navigation.navigate('Recipes', { ingredients, tools: selectedTools })}>
-            <LinearGradient colors={['#1b5e20', '#2e7d32']} style={styles.gradientBtn}>
-              <Text style={styles.nextBtnText}>Find Recipes ({selectedTools.length})</Text>
-              <ChevronRight color="#FFD700" size={24} />
-            </LinearGradient>
+          {/* 4. DYNAMIC COUNTER */}
+          <Text style={styles.counterText}>
+            {selectedTools.length} {selectedTools.length === 1 ? 'tool is' : 'tools are'} selected
+          </Text>
+          
+          <TouchableOpacity 
+            style={[styles.findBtn, selectedTools.length === 0 && styles.disabledBtn]} 
+            onPress={handleFindRecipes}
+            disabled={selectedTools.length === 0}
+          >
+            <Text style={styles.findBtnText}>Find Recipes</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -73,18 +108,98 @@ export default function ToolsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#FBFCF5' },
-  responsiveWrapper: { flex: 1, maxWidth: 1020, alignSelf: 'center', width: '100%' },
-  header: { padding: 24, flexDirection: 'row', alignItems: 'center', gap: 15 },
-  backBtn: { width: 44, height: 44, borderRadius: 12, backgroundColor: '#fff', justifyContent: 'center', alignItems: 'center', elevation: 2 },
-  title: { fontSize: 28, fontWeight: '800', color: '#1b5e20' },
-  scrollContent: { paddingHorizontal: 16, paddingBottom: 120 },
-  toolCard: { flex: 1, borderRadius: 24, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: '#e0e0e0', backgroundColor: '#fff' },
-  iconCircle: { width: 60, height: 60, borderRadius: 30, backgroundColor: '#f0f4f0', justifyContent: 'center', alignItems: 'center', marginBottom: 10 },
-  toolName: { fontWeight: '700', color: '#1b5e20', fontSize: 15 },
-  checkBadge: { position: 'absolute', top: 12, right: 12 },
-  footer: { position: 'absolute', bottom: 0, width: '100%', padding: 24, backgroundColor: '#fbfcf5' },
-  nextBtn: { height: 64, borderRadius: 22, overflow: 'hidden' },
-  gradientBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 24 },
-  nextBtnText: { color: '#FFD700', fontSize: 18, fontWeight: '800' }
+  container: { flex: 1, backgroundColor: '#fff' },
+  header: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    paddingHorizontal: 15, 
+    paddingVertical: 15,
+    backgroundColor: '#fff' 
+  },
+  backButton: { marginRight: 10 },
+  headerTitle: { fontSize: 24, fontWeight: '900', color: '#000' },
+  headerSubtitle: { fontSize: 14, fontWeight: '700', color: '#666', marginTop: -4 },
+  
+  yellowBody: { 
+    flex: 1, 
+    backgroundColor: '#FFB300', 
+    paddingHorizontal: 20, 
+    paddingTop: 25 
+  },
+  mainCard: { 
+    backgroundColor: '#fff', 
+    borderRadius: 30, 
+    padding: 20, 
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+  },
+  instructionText: { 
+    fontSize: 14, 
+    color: '#333', 
+    marginBottom: 20,
+    lineHeight: 18,
+    fontWeight: '600'
+  },
+  toolsGrid: { 
+    flexDirection: 'row', 
+    flexWrap: 'wrap', 
+    justifyContent: 'space-between' 
+  },
+  toolCard: { 
+    width: '48%', 
+    height: 125, 
+    backgroundColor: '#fff', 
+    borderRadius: 20, 
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+    marginBottom: 12, 
+    justifyContent: 'center', 
+    alignItems: 'center' 
+  },
+  toolCardActive: {
+    borderColor: '#2E5A00',
+    borderWidth: 2,
+  },
+  imageCircle: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#F0F0F0',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 10
+  },
+  imageCircleActive: {
+    backgroundColor: '#C0CA33', // Olive green circle when selected
+  },
+  toolImage: { width: 40, height: 40 },
+  toolName: { fontSize: 13, fontWeight: '900', color: '#000' },
+  
+  footer: { 
+    marginTop: 20, 
+    alignItems: 'center' 
+  },
+  counterText: { 
+    color: '#2E5A00', 
+    fontWeight: '800', 
+    marginBottom: 15,
+    fontSize: 15
+  },
+  findBtn: { 
+    backgroundColor: '#2E5A00', 
+    width: '100%',
+    height: 65, 
+    borderRadius: 25, 
+    justifyContent: 'center', 
+    alignItems: 'center',
+    elevation: 5
+  },
+  disabledBtn: {
+    backgroundColor: '#4A5D3B', // Muted green when nothing selected
+    opacity: 0.7
+  },
+  findBtnText: { color: '#fff', fontWeight: 'bold', fontSize: 22 }
 });
