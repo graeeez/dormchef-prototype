@@ -68,7 +68,7 @@ export default function HomeScreen() {
           <Text style={styles.savedText}>Saved Recipes ({savedRecipes.length})</Text>
         </TouchableOpacity>
 
-        {/* Input Section */}
+       
         <View style={styles.card}>
           <Text style={styles.label}>Input Your Ingredients</Text>
           <View style={styles.inputWrapper}>
