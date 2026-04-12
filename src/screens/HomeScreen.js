@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
     fontSize: 16, 
     fontWeight: '500', 
     color: '#000',
-    // FIX: Explicitly removes borders for a clean look
+    
     borderWidth: 0,
     ...Platform.select({
       web: { outlineStyle: 'none' },
