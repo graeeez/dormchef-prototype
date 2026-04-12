@@ -11,7 +11,7 @@ const RECIPES = [
     tags: ['Healthy', 'Budget', 'Easy'],
     ingredients: ['Rice', 'Egg', 'Soy Sauce', 'Oil'],
     missingText: 'No soy sauce? Try salt and a bit of butter instead.',
-    instructions: ['Cook rice', 'Scramble eggs', 'Mix together with soy sauce'],
+    instructions: ['Cook rice in rice cooker', 'Beat 2 eggs in a microwave-safe bowl', 'Microwave eggs for 1-2 minutes, stirring halfway','Mix cooked eggs with rice','Add soy sauce and a drizzle of oil, mix well '],
     time: '15 mins'
   },
   { 
@@ -20,7 +20,7 @@ const RECIPES = [
     tags: ['Healthy', 'Budget', 'Easy'],
     ingredients: ['Rice', 'Egg', 'Canned Tuna'],
     missingText: 'Missing canned tuna? Try using shredded chicken.',
-    instructions: ['Cook rice', 'Add tuna and egg', 'Steam for 2 mins'],
+    instructions: ['Cook rice in rice cooker', 'Drain canned tuna and place on top of hot rice ', 'Make a small well in the center and crack an egg','Microwave for 30-40 seconds until egg is cooked','Mix everything together and enjoy'],
     time: '12 mins'
   },
   { 
@@ -29,16 +29,16 @@ const RECIPES = [
     tags: ['Budget', 'Easy'],
     ingredients: ['Instant Noodles', 'Egg', 'Vegetables'],
     missingText: 'No veggies? Use frozen peas or corn.',
-    instructions: ['Boil noodles', 'Add egg', 'Season'],
+    instructions: ['Boil water in electric kettle', 'Place noodles in a bowl and pour hot water over them', 'Beat egg in a separate microwave-safe bowl','Microwave egg for 1 minute','Add cooked egg and any veggies to noodles, mix with seasoning'],
     time: '8 mins'
-  },
+  },    
   { 
     id: '4', 
     title: 'Steam Veggie Medley', 
     tags: ['Healthy', 'Easy'],
     ingredients: ['Broccoli', 'Carrots', 'Corn'],
     missingText: 'Any veggie works!',
-    instructions: ['Steam all veggies until soft'],
+    instructions: ['Beat 2 eggs with 2 tablespoons milk in microwave-safe bowl','Add a pinch of salt','Microwave for 1-2 minutes, stirring halfway','Microwave for 45 seconds, stir','Microwave for another 30-45 seconds','Stir in shredded cheese and let sit for 1 minute'],
     time: '10 mins'
   }
 ];

@@ -39,7 +39,7 @@ export default function HomeScreen() {
         {/* Header Section */}
         <View style={styles.header}>
           <View>
-            <Text style={styles.brandName}>BESTIE BITES</Text>
+            <Text style={styles.brandName}>NAME OF THE APP</Text>
             <Text style={styles.tagline}>What's in your pantry?</Text>
           </View>
           <View style={styles.bookIconBox}>
@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
     fontSize: 16, 
     fontWeight: '500', 
     color: '#000',
-    
+
     borderWidth: 0,
     ...Platform.select({
       web: { outlineStyle: 'none' },
